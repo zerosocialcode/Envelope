@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+{% if dark_mode_meta %}<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">{% endif %}
+<title>{{ subject_line or header_text or body_heading or "Email" }}</title>
+<!--[if mso]>
+<noscript>
+<xml>
+<o:OfficeDocumentSettings>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml>
+</noscript>
+<![endif]-->
+<style>
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+  img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+  body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; background-color: {{ page_bg }}; }
+  a { text-decoration: none; }
+  @media screen and (max-width: 600px) {
+    .email-container { width: 100% !important; }
+    .fluid-padding { padding-left: 20px !important; padding-right: 20px !important; }
+    .stack-col { display:block !important; width:100% !important; max-width:100% !important; }
+    .stack-col img { width:100% !important; height:auto !important; }
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:{{ page_bg }}; font-family:{{ font_family }};">
+{% if preheader %}
+<div style="display:none; font-size:1px; color:{{ page_bg }}; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">
+  {{ preheader }}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+</div>
+{% endif %}
+<center style="width:100%; background-color:{{ page_bg }};">
+<div style="max-width:{{ container_width }}px; margin:0 auto;" class="email-container">
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:{{ container_width }}px; margin:0 auto;" class="email-container">
+<tr>
+<td style="padding:20px 0;">
+
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color:{{ container_bg }}; border-radius:{{ border_radius }}px; overflow:hidden;">
+
+{% if show_header %}
+<tr>
+<td style="background-color:{{ header_bg }}; padding:28px 32px; text-align:{{ header_align }};" class="fluid-padding">
+  {% if logo_url %}
+  <img src="{{ logo_url }}" width="{{ logo_width }}" alt="{{ logo_alt }}" style="display:inline-block; max-width:{{ logo_width }}px; height:auto; {% if header_text %}margin-bottom:12px;{% endif %}">
+  {% endif %}
+  {% if header_text %}
+  <div style="font-family:{{ font_family }}; font-size:18px; font-weight:600; color:{{ header_text_color }}; {% if logo_url %}margin-top:8px;{% endif %}">
+    {{ header_text }}
+  </div>
+  {% endif %}
+</td>
+</tr>
+{% endif %}
+
+{% if show_hero and hero_url %}
+<tr>
+<td style="line-height:0; font-size:0;">
+  {% if hero_link %}<a href="{{ hero_link }}" target="_blank">{% endif %}
+  <img src="{{ hero_url }}" width="{{ container_width }}" alt="{{ hero_alt }}" style="display:block; width:100%; max-width:100%; height:auto;">
+  {% if hero_link %}</a>{% endif %}
+</td>
+</tr>
+{% endif %}
+
+{% if show_body %}
+<tr>
+<td style="padding:{{ body_padding }}px; text-align:{{ body_align }};" class="fluid-padding">
+  {% if body_heading %}
+  <h1 style="margin:0 0 16px 0; font-family:{{ font_family }}; font-size:24px; line-height:1.3; font-weight:700; color:{{ body_heading_color }};">
+    {{ body_heading }}
+  </h1>
+  {% endif %}
+  {% if body_text %}
+  <div style="font-family:{{ font_family }}; font-size:{{ body_font_size }}px; line-height:1.6; color:{{ body_text_color }};">
+    {% for line in body_text.split('\n') %}
+      {% if line.strip() %}<p style="margin:0 0 14px 0;">{{ line }}</p>{% else %}<br>{% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if show_button and button_text %}
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:24px;">
+    <tr>
+      <td align="{{ button_align }}">
+        <table role="presentation" cellpadding="0" cellspacing="0">
+          <tr>
+            {% if show_button and button_text %}
+            <td style="border-radius:{{ button_radius }}px; background-color:{{ button_bg }};">
+              <a href="{{ button_url or '#' }}" target="_blank" style="display:inline-block; padding:13px 28px; font-family:{{ font_family }}; font-size:15px; font-weight:600; color:{{ button_text_color }}; border-radius:{{ button_radius }}px;">
+                {{ button_text }}
+              </a>
+            </td>
+            {% endif %}
+            {% if show_button2 and button2_text %}
+            <td style="border-radius:{{ button_radius }}px; background-color:{{ button2_bg }}; border:1px solid {{ button2_border }}; {% if show_button and button_text %}padding-left:10px; border-left-width:0;{% endif %}">
+              <a href="{{ button2_url or '#' }}" target="_blank" style="display:inline-block; padding:12px 27px; font-family:{{ font_family }}; font-size:15px; font-weight:600; color:{{ button2_text_color }}; border-radius:{{ button_radius }}px;">
+                {{ button2_text }}
+              </a>
+            </td>
+            {% endif %}
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  {% endif %}
+</td>
+</tr>
+{% endif %}
+
+{% if show_columns and (col1_text or col1_image or col2_text or col2_image) %}
+<tr>
+<td style="padding:8px 32px 32px;" class="fluid-padding">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td class="stack-col" valign="top" width="50%" style="padding-right:12px;">
+        {% if col1_image %}<img src="{{ col1_image }}" alt="{{ col1_alt }}" width="100%" style="display:block; width:100%; height:auto; border-radius:8px; margin-bottom:12px;">{% endif %}
+        {% if col1_heading %}<div style="font-family:{{ font_family }}; font-size:16px; font-weight:700; color:{{ body_heading_color }}; margin-bottom:6px;">{{ col1_heading }}</div>{% endif %}
+        {% if col1_text %}<div style="font-family:{{ font_family }}; font-size:14px; line-height:1.55; color:{{ body_text_color }};">{{ col1_text }}</div>{% endif %}
+      </td>
+      <td class="stack-col" valign="top" width="50%" style="padding-left:12px;">
+        {% if col2_image %}<img src="{{ col2_image }}" alt="{{ col2_alt }}" width="100%" style="display:block; width:100%; height:auto; border-radius:8px; margin-bottom:12px;">{% endif %}
+        {% if col2_heading %}<div style="font-family:{{ font_family }}; font-size:16px; font-weight:700; color:{{ body_heading_color }}; margin-bottom:6px;">{{ col2_heading }}</div>{% endif %}
+        {% if col2_text %}<div style="font-family:{{ font_family }}; font-size:14px; line-height:1.55; color:{{ body_text_color }};">{{ col2_text }}</div>{% endif %}
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+{% endif %}
+
+{% if show_divider %}
+<tr>
+<td style="padding:0 32px;">
+  <div style="border-top:1px solid {{ divider_color }}; line-height:1px; font-size:1px;">&nbsp;</div>
+</td>
+</tr>
+{% endif %}
+
+{% if show_spacer %}
+<tr>
+<td style="height:{{ spacer_height }}px; line-height:{{ spacer_height }}px; font-size:1px;">&nbsp;</td>
+</tr>
+{% endif %}
+
+{% if show_social and social_links %}
+<tr>
+<td style="background-color:{{ social_bg }}; padding:20px 32px; text-align:center;" class="fluid-padding">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+    <tr>
+      {% for net, url in social_links.items() %}
+      <td style="padding:0 8px;">
+        <a href="{{ url }}" target="_blank" style="display:inline-block; width:34px; height:34px; line-height:34px; text-align:center; border-radius:50%; background-color:{{ social_icon_color }}; color:#ffffff; font-family:{{ font_family }}; font-size:13px; font-weight:700;">
+          {{ net[0]|upper }}
+        </a>
+      </td>
+      {% endfor %}
+    </tr>
+  </table>
+</td>
+</tr>
+{% endif %}
+
+{% if show_footer %}
+<tr>
+<td style="background-color:{{ footer_bg }}; padding:24px 32px; text-align:{{ footer_align }};" class="fluid-padding">
+  {% if footer_text %}
+  <div style="font-family:{{ font_family }}; font-size:12px; line-height:1.6; color:{{ footer_text_color }};">
+    {{ footer_text }}
+  </div>
+  {% endif %}
+  {% if footer_address %}
+  <div style="font-family:{{ font_family }}; font-size:11px; line-height:1.6; color:{{ footer_text_color }}; margin-top:6px; opacity:0.85;">
+    {{ footer_address }}
+  </div>
+  {% endif %}
+  {% if footer_link_text %}
+  <div style="margin-top:10px;">
+    <a href="{{ footer_link_url or '#' }}" style="font-family:{{ font_family }}; font-size:12px; color:{{ footer_text_color }}; text-decoration:underline;">
+      {{ footer_link_text }}
+    </a>
+  </div>
+  {% endif %}
+</td>
+</tr>
+{% endif %}
+
+</table>
+
+</td>
+</tr>
+</table>
+</div>
+</center>
+</body>
+</html>

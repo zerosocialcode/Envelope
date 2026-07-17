@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Envelope — HTML Email Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="26" height="26" rx="7" fill="url(#env-grad)"/>
+          <path d="M5 9.2L13 14.5L21 9.2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="5" y="7" width="16" height="12" rx="2" stroke="white" stroke-width="1.6"/>
+          <defs>
+            <linearGradient id="env-grad" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6366F1"/>
+              <stop offset="1" stop-color="#EC4899"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
+      <span class="brand-name">Envelope</span>
+      <span class="brand-pill">Enterprise Edition</span>
+    </div>
+
+    <div class="topbar-center">
+      <button type="button" class="icon-btn" id="undo-btn" title="Undo (Ctrl+Z)" disabled>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M9 14L4 9L9 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9H14.5C18.09 9 21 11.91 21 15.5C21 19.09 18.09 22 14.5 22H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="redo-btn" title="Redo (Ctrl+Shift+Z)" disabled>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M15 14L20 9L15 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 9H9.5C5.91 9 3 11.91 3 15.5C3 19.09 5.91 22 9.5 22H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="divider-v"></div>
+      <button type="button" class="icon-btn" id="theme-toggle" title="Toggle builder theme">
+        <svg id="theme-icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/><path d="M12 2V4.5M12 19.5V22M22 12H19.5M4.5 12H2M19.07 4.93L17.3 6.7M6.7 17.3L4.93 19.07M19.07 19.07L17.3 17.3M6.7 6.7L4.93 4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-actions">
+      <button type="button" class="btn btn-ghost" id="gallery-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+        Templates
+      </button>
+      <button type="button" class="btn btn-ghost" id="save-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M19 21H5C3.9 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H16L21 8V19C21 20.1 20.1 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 3V8H16V3" stroke="currentColor" stroke-width="2"/><rect x="6" y="13" width="12" height="7" stroke="currentColor" stroke-width="2"/></svg>
+        Save
+      </button>
+      <div class="menu-wrap">
+        <button type="button" class="btn btn-ghost" id="more-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg>
+        </button>
+        <div class="menu" id="more-menu">
+          <button type="button" id="export-json-btn">Export design (.json)</button>
+          <button type="button" id="import-json-btn">Import design (.json)</button>
+          <button type="button" id="copy-html-btn">Copy HTML to clipboard</button>
+          <input type="file" id="import-json-input" accept="application/json" hidden>
+        </div>
+      </div>
+      <button type="button" class="btn btn-ghost" id="send-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21 3L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3L14.5 21L11 13L3 9.5L21 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        Send
+      </button>
+      <button type="submit" form="builder-form" formaction="/download" class="btn btn-primary" id="download-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3V16M12 16L7 11M12 16L17 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Download HTML
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <form id="builder-form" class="panel" action="/preview" method="post" autocomplete="off">
+
+    <div class="panel-scroll">
+
+    <section class="group" data-accent="meta" data-open="true">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="meta">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 7L12 13L22 7" stroke="currentColor" stroke-width="2"/></svg>
+        </span>
+        <h2>Campaign details</h2>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <label class="block">Subject line
+          <input type="text" name="subject_line" id="subject_line" maxlength="150" placeholder="Your March product update is here">
+          <span class="field-hint"><span id="subject-count">0</span>/60 recommended for inbox display</span>
+        </label>
+        <div class="row">
+          <label>From name
+            <input type="text" name="from_name" id="from_name" placeholder="Your Company">
+          </label>
+          <label>Preheader text
+            <input type="text" name="preheader" id="preheader" placeholder="The short preview snippet after the subject">
+          </label>
+        </div>
+        <div class="spam-panel" id="spam-panel">
+          <div class="spam-meter">
+            <div class="spam-meter-fill" id="spam-meter-fill"></div>
+          </div>
+          <div class="spam-readout">
+            <span id="spam-label">Deliverability check: looking clean</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" data-accent="layout" data-open="true">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="layout">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9H21" stroke="currentColor" stroke-width="2"/></svg>
+        </span>
+        <h2>Layout &amp; branding</h2>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <label class="block">Brand color presets
+          <div class="swatch-row" id="brand-presets">
+            <button type="button" class="swatch" data-set="6366F1,1a73e8,ffffff" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)" title="Indigo"></button>
+            <button type="button" class="swatch" data-set="0F172A,0EA5E9,ffffff" style="background:linear-gradient(135deg,#0F172A,#0EA5E9)" title="Slate & sky"></button>
+            <button type="button" class="swatch" data-set="EC4899,F43F5E,ffffff" style="background:linear-gradient(135deg,#EC4899,#F43F5E)" title="Rose"></button>
+            <button type="button" class="swatch" data-set="16A34A,22C55E,ffffff" style="background:linear-gradient(135deg,#16A34A,#22C55E)" title="Emerald"></button>
+            <button type="button" class="swatch" data-set="F59E0B,F97316,111111" style="background:linear-gradient(135deg,#F59E0B,#F97316)" title="Amber"></button>
+            <button type="button" class="swatch" data-set="111827,4B5563,ffffff" style="background:linear-gradient(135deg,#111827,#4B5563)" title="Ink"></button>
+          </div>
+        </label>
+        <div class="row">
+          <label>Container width (px)
+            <input type="number" name="container_width" id="container_width" value="600" min="320" max="800">
+          </label>
+          <label>Corner radius (px)
+            <input type="number" name="border_radius" value="10" min="0" max="40">
+          </label>
+        </div>
+        <div class="row">
+          <label>Content background
+            <input type="color" name="container_bg" id="container_bg" value="#ffffff">
+          </label>
+          <label>Page background
+            <input type="color" name="page_bg" value="#f1f2f9">
+          </label>
+        </div>
+        <div class="row">
+          <label>Font family
+            <select name="font_family">
+              <option value="jakarta">Plus Jakarta Sans (modern)</option>
+              <option value="system">System (Segoe/Helvetica)</option>
+              <option value="arial">Arial</option>
+              <option value="georgia">Georgia (serif)</option>
+              <option value="trebuchet">Trebuchet MS</option>
+              <option value="verdana">Verdana</option>
+              <option value="courier">Courier (mono)</option>
+            </select>
+          </label>
+          <label>Body padding (px)
+            <input type="number" name="body_padding" value="32" min="0" max="80">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" data-accent="header">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="header">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><rect x="6" y="6" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.6"/><path d="M14 8H18M14 12H18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <h2>Header &amp; logo</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_header" checked> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <div class="row">
+          <label>Logo image URL
+            <input type="url" name="logo_url" placeholder="https://example.com/logo.png">
+          </label>
+          <label>Logo width (px)
+            <input type="number" name="logo_width" value="140" min="20" max="400">
+          </label>
+        </div>
+        <label class="block">Logo alt text (accessibility)
+          <input type="text" name="logo_alt" placeholder="Company name / logo">
+        </label>
+        <div class="row">
+          <label>Header text
+            <input type="text" name="header_text" placeholder="Optional heading next to/under logo">
+          </label>
+          <label>Header text color
+            <input type="color" name="header_text_color" value="#111111">
+          </label>
+        </div>
+        <div class="row">
+          <label>Header background
+            <input type="color" name="header_bg" value="#ffffff">
+          </label>
+          <label>Header alignment
+            <select name="header_align">
+              <option value="center">Center</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" data-accent="hero">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="hero">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="10" r="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M4 17L9 12L13 15L16 12L20 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h2>Hero banner image</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_hero"> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <label class="block">Banner image URL (full width)
+          <input type="url" name="hero_url" placeholder="https://example.com/banner.jpg">
+        </label>
+        <div class="row">
+          <label>Alt text
+            <input type="text" name="hero_alt" placeholder="Describe the image">
+          </label>
+          <label>Click-through link (optional)
+            <input type="url" name="hero_link" placeholder="https://example.com">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" data-accent="body" data-open="true">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="body">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </span>
+        <h2>Body copy</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_body" checked> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <label class="block">Heading
+          <input type="text" name="body_heading" id="body_heading" placeholder="e.g. Your weekly update is here">
+        </label>
+        <label class="block">Body text (each line becomes a paragraph)
+          <textarea name="body_text" id="body_text" rows="5" placeholder="Write your email copy here...">Hi {{first_name}},
+
+Thanks for being part of our community. We've got a few updates we think you'll like.</textarea>
+        </label>
+        <div class="merge-tags">
+          <span class="field-hint">Insert merge tag:</span>
+          <button type="button" class="tag-chip" data-tag="{{first_name}}">first_name</button>
+          <button type="button" class="tag-chip" data-tag="{{company}}">company</button>
+          <button type="button" class="tag-chip" data-tag="{{account_id}}">account_id</button>
+          <button type="button" class="tag-chip" data-tag="{{unsubscribe_link}}">unsubscribe_link</button>
+        </div>
+        <div class="row">
+          <label>Heading color
+            <input type="color" name="body_heading_color" value="#111111">
+          </label>
+          <label>Text color
+            <input type="color" name="body_text_color" value="#444444">
+          </label>
+        </div>
+        <div class="row">
+          <label>Text size (px)
+            <input type="number" name="body_font_size" value="16" min="10" max="28">
+          </label>
+          <label>Text alignment
+            <select name="body_align">
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" data-accent="columns">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="columns">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="8" height="16" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13" y="4" width="8" height="16" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+        </span>
+        <h2>Two-column feature</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_columns"> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <div class="col-pair">
+          <div class="col-card">
+            <span class="col-card-label">Column 1</span>
+            <input type="url" name="col1_image" placeholder="Image URL">
+            <input type="text" name="col1_alt" placeholder="Image alt text">
+            <input type="text" name="col1_heading" placeholder="Heading">
+            <textarea name="col1_text" rows="3" placeholder="Short text"></textarea>
+          </div>
+          <div class="col-card">
+            <span class="col-card-label">Column 2</span>
+            <input type="url" name="col2_image" placeholder="Image URL">
+            <input type="text" name="col2_alt" placeholder="Image alt text">
+            <input type="text" name="col2_heading" placeholder="Heading">
+            <textarea name="col2_text" rows="3" placeholder="Short text"></textarea>
+          </div>
+        </div>
+        <span class="field-hint">Stacks to a single column automatically on mobile clients.</span>
+      </div>
+    </section>
+
+    <section class="group" data-accent="button" data-open="true">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="8" rx="4" stroke="currentColor" stroke-width="2"/></svg>
+        </span>
+        <h2>Call to action</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_button" checked> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <div class="row">
+          <label>Primary button text
+            <input type="text" name="button_text" value="Get Started" placeholder="e.g. View Account">
+          </label>
+          <label>Primary button URL
+            <input type="url" name="button_url" placeholder="https://example.com">
+          </label>
+        </div>
+        <div class="row">
+          <label>Button color
+            <input type="color" name="button_bg" id="button_bg" value="#1a73e8">
+          </label>
+          <label>Text color
+            <input type="color" name="button_text_color" value="#ffffff">
+          </label>
+          <label>Corner radius (px)
+            <input type="number" name="button_radius" value="6" min="0" max="30">
+          </label>
+        </div>
+        <label class="block">Alignment
+          <select name="button_align">
+            <option value="center">Center</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+          </select>
+        </label>
+        <div class="contrast-hint" id="contrast-hint"></div>
+
+        <div class="sub-toggle-row">
+          <label class="toggle inline"><input type="checkbox" name="show_button2"> <span class="track"></span></label>
+          <span>Add a secondary (outline) button</span>
+        </div>
+        <div class="row">
+          <label>Secondary text
+            <input type="text" name="button2_text" placeholder="e.g. Learn more">
+          </label>
+          <label>Secondary URL
+            <input type="url" name="button2_url" placeholder="https://example.com">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" data-accent="divider">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="divider">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 5"/></svg>
+        </span>
+        <h2>Divider line</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_divider"> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <label>Line color
+          <input type="color" name="divider_color" value="#e0e0e0">
+        </label>
+      </div>
+    </section>
+
+    <section class="group" data-accent="spacer">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="spacer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 4V20M8 8L12 4L16 8M8 16L12 20L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h2>Spacer</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_spacer"> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <label>Height (px)
+          <input type="number" name="spacer_height" value="24" min="4" max="120">
+        </label>
+      </div>
+    </section>
+
+    <section class="group" data-accent="social">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="social">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8.2 10.8L15.8 7.2M8.2 13.2L15.8 16.8" stroke="currentColor" stroke-width="1.8"/></svg>
+        </span>
+        <h2>Social icons</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_social"> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <div class="row">
+          <label>Facebook URL
+            <input type="url" name="social_facebook" placeholder="https://facebook.com/yourpage">
+          </label>
+          <label>X / Twitter URL
+            <input type="url" name="social_x" placeholder="https://x.com/yourhandle">
+          </label>
+        </div>
+        <div class="row">
+          <label>LinkedIn URL
+            <input type="url" name="social_linkedin" placeholder="https://linkedin.com/company/you">
+          </label>
+          <label>Instagram URL
+            <input type="url" name="social_instagram" placeholder="https://instagram.com/yourhandle">
+          </label>
+        </div>
+        <div class="row">
+          <label>YouTube URL
+            <input type="url" name="social_youtube" placeholder="https://youtube.com/@you">
+          </label>
+          <label>Icon color
+            <input type="color" name="social_icon_color" value="#5b5fef">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" data-accent="footer" data-open="true">
+      <button type="button" class="group-head">
+        <span class="badge" data-badge="footer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 15H21" stroke="currentColor" stroke-width="2"/></svg>
+        </span>
+        <h2>Footer &amp; compliance</h2>
+        <label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" name="show_footer" checked> <span class="track"></span></label>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="group-body">
+        <label class="block">Footer text
+          <textarea name="footer_text" rows="2" placeholder="e.g. © 2026 Your Company. All rights reserved.">© 2026 Your Company, Inc. All rights reserved.</textarea>
+        </label>
+        <label class="block">Mailing address (CAN-SPAM / GDPR compliance)
+          <input type="text" name="footer_address" placeholder="123 Business Ave, Suite 100, City, Country">
+        </label>
+        <div class="row">
+          <label>Link text
+            <input type="text" name="footer_link_text" value="Unsubscribe" placeholder="e.g. Unsubscribe">
+          </label>
+          <label>Link URL
+            <input type="url" name="footer_link_url" placeholder="https://example.com/unsubscribe">
+          </label>
+        </div>
+        <div class="row">
+          <label>Text color
+            <input type="color" name="footer_text_color" value="#8a8a8a">
+          </label>
+          <label>Footer background
+            <input type="color" name="footer_bg" value="#fafafa">
+          </label>
+          <label>Alignment
+            <select name="footer_align">
+              <option value="center">Center</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+        </div>
+        <div class="sub-toggle-row">
+          <label class="toggle inline"><input type="checkbox" name="dark_mode_meta" checked> <span class="track"></span></label>
+          <span>Support email-client dark mode metadata</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" data-accent="meta">
+      <div class="group-body" style="padding-top:16px;">
+        <label class="block">Filename for download
+          <input type="text" name="filename" value="email-campaign">
+        </label>
+      </div>
+    </section>
+
+    </div>
+
+    <div class="panel-footer">
+      Envelope · developed by <strong>Anhar Hussan</strong>
+      <a href="https://github.com/zerosocialcode" target="_blank" rel="noopener">@zerosocialcode</a>
+    </div>
+
+  </form>
+
+  <div class="preview-pane">
+    <div class="inbox-mock" id="inbox-mock">
+      <div class="inbox-avatar" id="inbox-avatar">E</div>
+      <div class="inbox-lines">
+        <div class="inbox-row1">
+          <span class="inbox-from" id="inbox-from">Your Company</span>
+          <span class="inbox-time">9:41 AM</span>
+        </div>
+        <div class="inbox-subject" id="inbox-subject">Your subject line will appear here</div>
+        <div class="inbox-preheader" id="inbox-preheader">Preheader preview text shows up right after the subject in most inboxes</div>
+      </div>
+    </div>
+
+    <div class="preview-toolbar">
+      <div class="width-toggle">
+        <button type="button" class="w-btn active" data-w="100%" title="Desktop">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="13" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M8 20H16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" class="w-btn" data-w="480px" title="Tablet">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
+        </button>
+        <button type="button" class="w-btn" data-w="375px" title="Mobile">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="7" y="2" width="10" height="20" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
+        </button>
+      </div>
+      <span class="preview-label">Live preview</span>
+      <label class="toggle inline" id="dark-preview-toggle" title="Preview in a dark-mode inbox">
+        <input type="checkbox" id="dark-preview-check"> <span class="track"></span>
+        <span class="toggle-text">Dark inbox</span>
+      </label>
+    </div>
+    <div class="preview-frame-wrap">
+      <iframe id="preview" title="Email preview"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Template gallery modal -->
+<div class="modal-overlay" id="gallery-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Templates</h3>
+      <button type="button" class="icon-btn" id="gallery-close">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button type="button" class="modal-tab active" data-tab="starters">Starter templates</button>
+      <button type="button" class="modal-tab" data-tab="saved">My saved templates</button>
+    </div>
+    <div class="modal-body" id="starters-tab">
+      <div class="template-grid" id="starter-grid"></div>
+    </div>
+    <div class="modal-body hidden" id="saved-tab">
+      <div class="template-list" id="saved-list">
+        <p class="empty-hint">No saved templates yet — build something and hit "Save".</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Save dialog -->
+<div class="modal-overlay" id="save-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h3>Save template</h3>
+      <button type="button" class="icon-btn" id="save-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="block">Template name
+        <input type="text" id="save-name-input" placeholder="e.g. Monthly newsletter">
+      </label>
+      <button type="button" class="btn btn-primary" id="save-confirm-btn" style="width:100%; justify-content:center; margin-top:8px;">Save to library</button>
+    </div>
+  </div>
+</div>
+
+<!-- Send email modal -->
+<div class="modal-overlay" id="send-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h3>Send email</h3>
+      <button type="button" class="icon-btn" id="send-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="send-setup">
+        <p class="empty-hint" style="margin-bottom:12px;">Enter the account to send from. This is saved locally in a <code>.env</code> file on this machine, so you'll only need to do this once.</p>
+        <label class="block">Your email (Gmail)
+          <input type="email" id="sender-email-input" placeholder="you@gmail.com">
+        </label>
+        <label class="block">App password
+          <input type="password" id="sender-app-password-input" placeholder="16-character app password" autocomplete="new-password">
+          <span class="field-hint">Not your normal password — create one at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a> (requires 2-Step Verification). Using a different provider? Send anyway and adjust <code>SMTP_HOST</code>/<code>SMTP_PORT</code> in <code>.env</code> if needed.</span>
+        </label>
+      </div>
+      <div id="send-account-note" class="hidden" style="margin-bottom:14px;">
+        Sending from <strong id="send-account-email"></strong> ·
+        <a href="#" id="send-change-account">use a different account</a>
+      </div>
+      <label class="block">Send to
+        <input type="email" id="send-to-input" placeholder="recipient@example.com">
+      </label>
+      <button type="button" class="btn btn-primary" id="send-confirm-btn" style="width:100%; justify-content:center; margin-top:8px;">
+        <span id="send-confirm-label">Send email</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

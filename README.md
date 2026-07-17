@@ -1,105 +1,99 @@
-# Envelope — HTML Email Builder (Enterprise Edition)
+# Envelope — HTML Email Builder
 
-A Flask web tool for building production-grade, table-based HTML
-marketing and transactional emails, with a live preview, an inbox
-mock-up, a reusable template library, and the kind of guardrails
-a marketing-ops team actually needs day to day.
+A Flask-based web application for building production-grade, table-based HTML emails designed for marketing and transactional use cases. The platform features a live preview system, inbox rendering mock-up, reusable template library, and comprehensive quality assurance tools tailored for marketing operations teams.
 
-**Developed by Anhar Hussan** — [github.com/zerosocialcode](https://github.com/zerosocialcode)
+## Overview
 
-## Feature overview
+Envelope provides a complete solution for email template development and management, with built-in compliance features and quality controls to ensure reliable email delivery and rendering across clients.
 
-**Content blocks** (every block is optional — turn it off and it's
-simply left out of the exported HTML):
+## Features
+
+### Content Blocks
+All content blocks are modular and optional—disable any block and it will be excluded from the exported HTML:
+
 - Header with logo, alt text, and header text
-- Full-width hero banner image (with optional click-through link)
-- Body heading + copy, with merge-tag shortcuts (`{{first_name}}`,
-  `{{company}}`, `{{account_id}}`, `{{unsubscribe_link}}`)
-- Two-column image + text feature block (stacks on mobile)
-- Primary CTA button + optional secondary/outline button
-- Divider line and adjustable spacer
+- Full-width hero banner image with optional click-through link
+- Body copy with merge-tag support (`{{first_name}}`, `{{company}}`, `{{account_id}}`, `{{unsubscribe_link}}`)
+- Two-column image and text feature block (responsive mobile stacking)
+- Primary and optional secondary/outline call-to-action buttons
+- Divider line and adjustable spacer elements
 - Social icon row (Facebook, X, LinkedIn, Instagram, YouTube)
-- Footer with mailing address and unsubscribe link (CAN-SPAM/GDPR-friendly)
+- Footer with mailing address and unsubscribe link (CAN-SPAM/GDPR compliant)
 
-**Workflow & QA tools:**
-- Live, debounced preview as you type, rendered in an iframe
-- Inbox mock-up showing exactly how the from name / subject /
-  preheader will look in a recipient's inbox
-- Subject-line length counter and a lightweight deliverability
-  ("spam word") checker with a live risk meter
-- WCAG contrast checker for the primary button's text/background pair
-- Desktop / tablet / mobile preview widths, plus a dark-inbox preview toggle
-- Undo / redo history (also via Ctrl+Z / Ctrl+Shift+Z) and Ctrl+S to save
-- Brand color presets to recolor buttons, header text, and social icons in one click
+### Workflow and Quality Assurance Tools
 
-**Template library:**
-- Five ready-made starter templates (Newsletter, Promotional Sale,
-  Welcome Email, Event Invitation, Transactional Receipt)
-- Save/load/delete your own templates, stored server-side as JSON
-  under `saved_templates/`
-- Export/import a design as a portable `.json` file
-- One-click "Copy HTML to clipboard" and "Download HTML"
+- **Live preview** with real-time rendering in iframe as you edit
+- **Inbox mock-up** showing exact rendering of sender name, subject line, and preheader text
+- **Subject line analysis** including character counter and lightweight deliverability checker with risk meter
+- **WCAG compliance checker** for button text and background color contrast ratios
+- **Responsive preview modes** for desktop, tablet, and mobile viewports, plus dark-mode inbox preview
+- **History management** with undo/redo functionality (Ctrl+Z / Ctrl+Shift+Z) and Ctrl+S save shortcut
+- **Brand color presets** for one-click recoloring of buttons, headers, and social icons
 
-**Send it for real:**
-- A "Send" button sends the email you just built straight from the browser
-- The first time you use it, you're asked once for the sending email
-  address and an app password — these are saved to a local `.env`
-  file (git-ignored) so you won't be asked again
-- Defaults to Gmail's SMTP server; use "use a different account" in
-  the Send dialog to swap accounts, or edit `SMTP_HOST`/`SMTP_PORT`
-  in `.env` for another provider
+### Template Library
 
-## Run it
+- Five professionally designed starter templates (Newsletter, Promotional Sale, Welcome Email, Event Invitation, Transactional Receipt)
+- Server-side template storage as JSON files
+- Export and import designs as portable `.json` files
+- One-click export functionality (copy HTML to clipboard or download)
+
+### Email Sending Capabilities
+
+- Integrated Send feature for testing and delivery directly from the builder
+- One-time configuration for sending email credentials stored in `.env` (not version-controlled)
+- Gmail SMTP support by default with option to configure alternative providers
+- Support for app password authentication with optional account switching
+
+## Getting Started
+
+### Installation
 
 ```bash
 pip install -r requirements.txt
 python3 app.py
 ```
 
-Then open http://127.0.0.1:5000 in your browser.
+Open http://127.0.0.1:5000 in your browser.
 
-### Setting up "Send"
-The Send button uses Gmail's SMTP server by default and needs an
-**app password**, not your normal Google account password:
-1. Turn on 2-Step Verification on your Google account, if it isn't already.
-2. Go to https://myaccount.google.com/apppasswords and create an app
-   password (choose "Mail" as the app).
-3. Click "Send" in the builder, enter your Gmail address and the
-   16-character app password it gives you, then the recipient address.
+### Configuring Email Send
 
-These credentials are written to a `.env` file next to `app.py` and
-are never sent anywhere except directly to the SMTP server when you
-click Send. `.env` is listed in `.gitignore` — don't commit it.
+The Send feature requires Gmail SMTP configuration:
 
-## Project structure
+1. Enable 2-Step Verification on your Google account
+2. Generate an app password at https://myaccount.google.com/apppasswords (select "Mail")
+3. Click Send in the builder, enter your Gmail address and the 16-character app password, then specify the recipient
+
+Credentials are stored in a `.env` file and transmitted only to the SMTP server. The `.env` file is git-ignored and should never be committed to version control.
+
+## Project Structure
 
 ```
-app.py                          Flask routes, sanitization, template-library API
-templates/index.html            The builder UI
-templates/email_template.html   The actual email markup (Jinja2, table-based, inline CSS)
-static/style.css                Builder UI styling (light/dark chrome)
-static/script.js                Live preview, accordion, undo/redo, spam check, template gallery
-saved_templates/                JSON storage for saved designs (git-ignored)
-.env                             SMTP credentials for the Send feature (git-ignored, created on first use)
+app.py                          Flask application, routing, sanitization, template API
+templates/index.html            Builder user interface
+templates/email_template.html   Email markup (Jinja2, table-based, inline CSS)
+static/style.css                UI styling (light/dark themes)
+static/script.js                Preview rendering, undo/redo, validation, template gallery
+saved_templates/                Server-side template storage (git-ignored)
+.env                             SMTP credentials (git-ignored, auto-created)
 ```
 
-## Notes on the generated email HTML
-- Uses nested `<table>` layout rather than `<div>`/flexbox, since that's
-  still the most reliable way to get consistent rendering across Outlook,
-  Gmail, Apple Mail, etc.
-- All styling is inlined (no external stylesheet), which is required by
-  most email clients that strip `<style>`/`<link>` tags.
-- Colors are restricted to valid hex values and URLs are restricted to
-  `http(s)://` or `mailto:` schemes as a basic safety measure.
-- Optional `color-scheme`/`supported-color-schemes` meta tags for
-  email-client dark mode.
+## Technical Details
 
-## Extending it further
-- Swap the JSON-file template store for a real database if this needs
-  to serve multiple concurrent authors
-- Add authentication before deploying `/download`, `/send`, and the
-  template API publicly — right now anyone who can reach the app can
-  send from the configured account
-- Swap direct SMTP for a transactional ESP API (SendGrid, Postmark,
-  SES, etc.) if you need delivery tracking, bounce handling, or higher
-  send volume than a personal Gmail account allows
+### Email Markup Standards
+
+- **Table-based layout**: Nested `<table>` elements ensure consistent rendering across Outlook, Gmail, Apple Mail, and other clients
+- **Inline CSS**: All styles are inlined—external stylesheets are stripped by most email clients
+- **Security**: Colors are validated as hex values; URLs are restricted to `http(s)://` or `mailto:` schemes
+- **Dark mode support**: Optional `color-scheme` and `supported-color-schemes` meta tags for email client dark mode
+
+## Future Enhancements
+
+Consider these improvements for production deployments:
+
+- Replace JSON file storage with a database backend for multi-user environments
+- Implement authentication for `/download`, `/send`, and template API endpoints before public deployment
+- Integrate with transactional email services (SendGrid, Postmark, AWS SES) for delivery tracking, bounce handling, and higher send volumes
+
+## Author
+
+Developed by Anhar Hussan. Visit the [GitHub profile](https://github.com/zerosocialcode) for additional projects and contributions.
